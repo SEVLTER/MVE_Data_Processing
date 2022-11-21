@@ -1,0 +1,5 @@
+/output/*
+/raw_data/*
+/misc/*
+.Rproj.user
+/scripts/download_SEVFS_gdrive_MVE_data.R
