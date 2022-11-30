@@ -1,10 +1,9 @@
 # KM Hall
 # 2022
 #
-# MVE Creosote data processing
+# MVE PJ data processing
 #
 #
-
 
 library(tidyverse)
 library(lubridate)
@@ -19,17 +18,13 @@ filter_forward <- 2022
 folder_out <- "output/"
   
 # name of final output file - THIS NEEDS TO BE CHANGED FOR THE DIFFERENT SITES
-file_name <- "MVE_Creosote_SoilMoistureTemperature.csv"
+file_name <- "MVE_PinonJuniper_SoilMoistureTemperature.csv"
 
 # load MVE data ------------------------------------------------------------
 
 # THIS NEEDS TO BE CHANGED FOR THE DIFFERENT SITES
-mve <- read_mve_in("MVE_Creosote.dat") %>% 
-  select(-RECORD) %>% 
-  arrange(TIMESTAMP)
-
-
-
+mve <- read_mve_in("MVE_PJ_Table1.dat") %>% 
+  select(-RECORD)
 
 
 # filter data to years of interest
@@ -42,9 +37,9 @@ glimpse(mve)
 
 # load sensor label data -----------------------------------------------
 
-# TODO: Need this for Black and Creosote. Only have it for Blue at this point.
-# sensor_labels <- read_csv("raw_data/MVE_PlainsGrassland_5TM_Sensor_Labels.csv") %>% 
-#   rename(sensor_id = sensor.id)
+# TODO: Need this for Black and Creosote and PJ. Only have it for Blue at this point.
+sensor_labels <- read_csv("raw_data/MVE_PlainsGrassland_5TM_Sensor_Labels.csv") %>% 
+  rename(sensor_id = sensor.id)
 
 
 
@@ -56,12 +51,11 @@ mve_long <- mve %>%
 mve_sub_long <- mve_sub %>% 
   pivot_longer(-TIMESTAMP, names_to = "sensor_id")
 
-table(mve_long$sensor_id)
 
 # separate sensor column on _ to get various pieces of information contained in the variable into their own variables and
 # adding date component variables
 # TODO: THIS MAY NEED TO BE DIFFERENT FOR THE DIFFERENT SITES, depending on how many pieces the 
-#   sensore variable has. 4 pieces for MVE Blue.
+#   sensore variable has. 4 pieces for MVE pj.
 mve_long <- mve_long %>% 
   separate(sensor_id, into = c("sensor", "piece1", "piece2", "piece3", "avg"), sep = "_", remove = FALSE) %>% 
   mutate(sensor = as.factor(sensor),
@@ -95,7 +89,8 @@ mve_sub_long <- mve_sub_long %>%
 glimpse(mve_long)
 
 
-# for creosote data, have to piece together the plot info because it ends up in various variables when 
+
+# for pj data, have to piece together the plot info because it ends up in various variables when 
 # separating due to the structure of the sensor_id var
 table(mve_long$sensor)
 table(mve_long$piece1)
@@ -154,10 +149,10 @@ table(is.na(mve_sub_long_tst$depth))
 # update data after testing variables
 mve_long <- mve_long_tst %>% 
   mutate( plot = as.factor(plot),
-    depth_f = as.factor(depth),
-    depth = as.numeric(depth)) %>% 
+          depth_f = as.factor(depth),
+          depth = as.numeric(depth)) %>% 
   select(-c(piece1, piece2, piece3, plot1split, plot2split, depth1split, depth2split))
-  
+
 mve_sub_long <- mve_sub_long_tst %>% 
   mutate( plot = as.factor(plot),
           depth_f = as.factor(depth),
@@ -165,19 +160,19 @@ mve_sub_long <- mve_sub_long_tst %>%
   select(-c(piece1, piece2, piece3, plot1split, plot2split, depth1split, depth2split))
 
 
+
+
 # Merge sensor data with sensor labels -------------------------------------
 
-# TODO: uncomment once I have sensor labels
+mve_long <- mve_long %>% 
+  left_join(sensor_labels) %>% 
+  mutate(mean_f = as.factor(mean_trt),
+         var_f  = as.factor(var_trt))
 
-# mve_long <- mve_long %>% 
-#   left_join(sensor_labels) %>% 
-#   mutate(mean_f = as.factor(mean_trt),
-#          var_f  = as.factor(var_trt))
-# 
-# mve_sub_long <- mve_sub_long %>% 
-#   left_join(sensor_labels) %>% 
-#   mutate(mean_f = as.factor(mean_trt),
-#          var_f  = as.factor(var_trt))
+mve_sub_long <- mve_sub_long %>% 
+  left_join(sensor_labels) %>% 
+  mutate(mean_f = as.factor(mean_trt),
+         var_f  = as.factor(var_trt))
 
 
 
