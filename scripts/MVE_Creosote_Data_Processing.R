@@ -19,7 +19,8 @@ filter_forward <- 2023
 folder_out <- "output/"
   
 # name of final output file - THIS NEEDS TO BE CHANGED FOR THE DIFFERENT SITES
-file_name <- "MVE_Creosote_SoilMoistureTemperature.csv"
+whole_file_name <- "MVE_Creosote_SoilMoistureTemperature.csv"
+sub_file_name <- paste0("MVE_Creosote_SoilMoistureTemperature_", filter_forward, ".csv")
 
 # load MVE data ------------------------------------------------------------
 
@@ -218,8 +219,8 @@ missing_data_sub_annual <- mve_sub_long %>%
 
 
 # write data to file ----------------------------------------------
-write_csv(mve_long, paste0(folder_out, file_name))
-
+write_csv(mve_long, paste0(folder_out, whole_file_name))
+write_csv(mve_sub_long, paste0(folder_out, sub_file_name))
 
 
 

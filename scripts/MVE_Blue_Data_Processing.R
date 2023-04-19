@@ -21,7 +21,8 @@ filter_forward <- 2023
 folder_out <- "output/"
   
 # name of final output file - THIS NEEDS TO BE CHANGED FOR THE DIFFERENT SITES
-file_name <- "MVE_PlainsGrassland_SoilMoistureTemperature.csv"
+whole_file_name <- "MVE_PlainsGrassland_SoilMoistureTemperature.csv"
+sub_file_name <- paste0("MVE_PlainsGrassland_SoilMoistureTemperature_", filter_forward, ".csv")
 
 # load MVE data ------------------------------------------------------------
 
@@ -104,7 +105,10 @@ mve_sub_long <- mve_sub_long %>%
 
 glimpse(mve_long)
 
-
+table(mve_long$plot)
+table(mve_long$depth)
+table(mve_long$sensor)
+table(mve_long$new)
 
 
 # Merge sensor data with sensor labels -------------------------------------
@@ -158,8 +162,8 @@ missing_data_sub_annual <- mve_sub_long %>%
 
 
 # write data to file ----------------------------------------------
-write_csv(mve_long, paste0(folder_out, file_name))
-
+write_csv(mve_long, paste0(folder_out, whole_file_name))
+write_csv(mve_long, paste0(folder_out, sub_file_name))
 
 
 

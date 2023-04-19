@@ -95,8 +95,10 @@ mve_sub_long <- mve_sub_long %>%
 
 glimpse(mve_long)
 
-
-
+table(mve_long$plot)
+table(mve_long$depth)
+table(mve_long$sensor)
+table(mve_long$avg)
 
 # Merge sensor data with sensor labels -------------------------------------
 
