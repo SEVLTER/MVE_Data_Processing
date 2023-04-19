@@ -13,13 +13,14 @@ library(lubridate)
 source("scripts/load_MVE_data_into_R.R")
 
 # subsets data to be >= to year requested here
-filter_forward <- 2022
+filter_forward <- 2023
 
 # folder where final data will be written
 folder_out <- "output/"
   
 # name of final output file - THIS NEEDS TO BE CHANGED FOR THE DIFFERENT SITES
-file_name <- "MVE_DesertGrassland_SoilMoistureTemperature.csv"
+whole_file_name <- "MVE_DesertGrassland_SoilMoistureTemperature.csv"
+sub_file_name <- paste0("MVE_DesertGrassland_SoilMoistureTemperature_", filter_forward, ".csv")
 
 # load MVE data ------------------------------------------------------------
 
@@ -150,8 +151,8 @@ missing_data_sub_annual <- mve_sub_long %>%
 
 
 # write data to file ----------------------------------------------
-write_csv(mve_long, paste0(folder_out, file_name))
-
+write_csv(mve_long, paste0(folder_out, whole_file_name))
+write_csv(mve_sub_long, paste0(folder_out, sub_file_name))
 
 
 

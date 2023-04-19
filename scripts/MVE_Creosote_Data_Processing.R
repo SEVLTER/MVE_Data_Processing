@@ -13,7 +13,7 @@ library(lubridate)
 source("scripts/load_MVE_data_into_R.R")
 
 # subsets data to be >= to year requested here
-filter_forward <- 2022
+filter_forward <- 2023
 
 # folder where final data will be written
 folder_out <- "output/"
