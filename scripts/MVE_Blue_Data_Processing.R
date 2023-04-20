@@ -163,7 +163,7 @@ missing_data_sub_annual <- mve_sub_long %>%
 
 # write data to file ----------------------------------------------
 write_csv(mve_long, paste0(folder_out, whole_file_name))
-write_csv(mve_long, paste0(folder_out, sub_file_name))
+write_csv(mve_sub_long, paste0(folder_out, sub_file_name))
 
 
 
