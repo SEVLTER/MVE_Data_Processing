@@ -4,5 +4,7 @@
 .Rproj.user
 /scripts/download_SEVFS_gdrive_MVE_data.R
 /scripts/MVE_PlainsGrassland_GraphicsStats.R
-/quarto/MVE_Blue_QAQC_Report_files
+/quarto/MVE_Blue_QAQC_Report_files/
 /quarto/MVE_Blue_QAQC_Report.html
+/quarto/MVE_Black_QAQC_Report_files/
+/quarto/MVE_Black_QAQC_Report.html

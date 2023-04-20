@@ -1,0 +1,139 @@
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)
+library(lubridate)
+library(kableExtra)
+
+# Name of File to read in:
+file_name <- "MVE_DesertGrassland_SoilMoistureTemperature_2023.csv"
+
+path_to_data_folder <- "~/Documents/SEV/Projects/MVE_Reporting/output/"
+
+mve_long <- read_csv(paste0(path_to_data_folder, file_name))
+mve <- mve_long %>% 
+  select(TIMESTAMP, sensor_id, value) %>% 
+  pivot_wider(names_from = sensor_id, values_from = value)
+```
+
+Loaded file: `r file_name`.
+
+------------------------------------------------------------------------
+
+## Number of records:
+
+Earliest and latest TIMESTAMP:  
+
+```{r, echo=FALSE}
+mve %>% 
+  summarize(minimum_TIMESTAMP = min(TIMESTAMP),
+            maximum_TIMESTAMP = max(TIMESTAMP))
+```
+
+Number of daily records:
+
+```{r, echo=FALSE}
+mve %>% 
+  mutate(Date = as_date(TIMESTAMP)) %>% 
+  group_by(Date) %>% 
+  summarize(Number_of_Records = n()) %>%
+  ggplot(., aes(x = Date, y = Number_of_Records)) +
+  geom_line(linewidth = 0.5) +
+  ggtitle("Number of Daily Records")
+```
+
+```{r, echo=FALSE}
+num_daily_records <- mve %>% 
+  mutate(Date = as_date(TIMESTAMP)) %>% 
+  group_by(Date) %>% 
+  summarize(Number_of_Records = n())
+
+num_daily_records %>% kbl() %>% kable_styling(full_width = FALSE)
+```
+
+
+
+------------------------------------------------------------------------
+
+## Data check:
+
+Graphs of all variables for each plot for MVE blue.
+
+```{r, echo=FALSE}
+# Function to select experimental plot and graph all variables for the given plot
+select_plot <- function(data, plot) {
+  data %>% 
+    select(TIMESTAMP, contains(plot)) %>% 
+    pivot_longer(contains(plot)) %>% 
+    ggplot(., aes(x = TIMESTAMP, y = value, color = name)) +
+    geom_point(size=0.2) +
+    facet_wrap(~name, scales="free_y") +
+    theme(legend.position="none")
+}
+```
+
+### Graphs of variables by Plot:
+
+```{r, echo=FALSE}
+select_plot(mve, "P13")
+select_plot(mve, "P14")
+select_plot(mve, "P15")
+select_plot(mve, "P16")
+select_plot(mve, "P17")
+select_plot(mve, "P18")
+select_plot(mve, "p18old")
+select_plot(mve, "P18old")
+select_plot(mve, "P19")
+select_plot(mve, "P20")
+select_plot(mve, "P21")
+select_plot(mve, "P22")
+select_plot(mve, "P23")
+select_plot(mve, "P23old")
+select_plot(mve, "P24")
+select_plot(mve, "P25")
+select_plot(mve, "P26")
+select_plot(mve, "P27")
+select_plot(mve, "P28")
+select_plot(mve, "P29")
+select_plot(mve, "P29old")
+select_plot(mve, "P30")
+
+```
+
+# Temperature - all plots---
+
+```{r, echo=FALSE}
+plot_variable <- function(data, measurement) {
+  data %>% 
+    filter(sensor == measurement) %>% 
+    ggplot(., aes(x = TIMESTAMP, y = value, color = as.factor(depth))) +
+    geom_point(size = 0.2, alpha = 0.5) +
+    facet_wrap(~ plot) +
+    labs(title = paste(measurement))
+}
+
+plot_variable_free_y <- function(data, measurement) {
+  data %>% 
+    filter(sensor == measurement) %>% 
+    ggplot(., aes(x = TIMESTAMP, y = value, color = as.factor(depth))) +
+    geom_point(size = 0.2, alpha = 0.5) +
+    facet_wrap(~ plot, scales = "free_y") +
+    labs(title = paste(measurement, "with free y-scale"))
+}
+```
+
+```{r, echo=FALSE}
+plot_variable(mve_long, "T")
+```
+
+# VWC - all plots---
+
+
+
+```{r, echo=FALSE}
+plot_variable(mve_long, "VWC")
+```
+
+Graph with the y-scale free to vary for each plot:
+
+```{r, echo=FALSE}
+plot_variable_free_y(mve_long, "VWC")
+```
