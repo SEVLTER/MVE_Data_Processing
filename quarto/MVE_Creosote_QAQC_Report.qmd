@@ -1,5 +1,5 @@
 ---
-title: "MVE Black QA/QC Report"
+title: "MVE Creosote QA/QC Report"
 author: "KM Hall"
 format: html
 editor: visual
@@ -12,7 +12,7 @@ library(lubridate)
 library(kableExtra)
 
 # Name of File to read in:
-file_name <- "MVE_DesertGrassland_SoilMoistureTemperature_2023.csv"
+file_name <- "MVE_Creosote_SoilMoistureTemperature_2023.csv"
 
 path_to_data_folder <- "~/Documents/SEV/Projects/MVE_Reporting/output/"
 
@@ -81,28 +81,24 @@ select_plot <- function(data, plot) {
 ### Graphs of variables by Plot:
 
 ```{r, echo=FALSE}
-select_plot(mve, "P13")
-select_plot(mve, "P14")
-select_plot(mve, "P15")
-select_plot(mve, "P16")
-select_plot(mve, "P17")
-select_plot(mve, "P18")
-select_plot(mve, "p18old")
-select_plot(mve, "P18old")
+select_plot(mve, "P1")
+select_plot(mve, "P2")
+select_plot(mve, "P3")
+select_plot(mve, "P4")
+select_plot(mve, "P6")
+select_plot(mve, "P7")
+select_plot(mve, "P8")
+select_plot(mve, "P9")
+select_plot(mve, "P10")
+select_plot(mve, "P11")
+select_plot(mve, "P12")
+
 select_plot(mve, "P19")
 select_plot(mve, "P20")
 select_plot(mve, "P21")
 select_plot(mve, "P22")
 select_plot(mve, "P23")
-select_plot(mve, "P23old")
 select_plot(mve, "P24")
-select_plot(mve, "P25")
-select_plot(mve, "P26")
-select_plot(mve, "P27")
-select_plot(mve, "P28")
-select_plot(mve, "P29")
-select_plot(mve, "P29old")
-select_plot(mve, "P30")
 
 ```
 
