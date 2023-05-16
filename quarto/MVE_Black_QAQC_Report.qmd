@@ -52,19 +52,22 @@ mve %>%
 
 Number of daily records:
 
-```{r, echo=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 mve %>% 
   mutate(Date = as_date(TIMESTAMP)) %>% 
   group_by(Date) %>% 
   summarize(Number_of_Records = n()) %>%
   ggplot(., aes(x = Date, y = Number_of_Records)) +
   geom_line(linewidth = 0.5) +
-  ggtitle("Number of Daily Records")
+  ggtitle("Number of Daily Records") +
+  theme_minimal() +
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
 
 Number of daily records in past 10 days:
 
-```{r, echo=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 num_daily_records <- mve %>% 
   mutate(Date = as_date(TIMESTAMP)) %>% 
   group_by(Date) %>% 
@@ -163,13 +166,15 @@ select_plot <- function(data, plot) {
     ggplot(., aes(x = TIMESTAMP, y = value, color = name)) +
     geom_point(size=0.2) +
     facet_wrap(~name, scales="free_y") +
-    theme(legend.position="none")
+    theme_minimal() +
+    theme(legend.position="none") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 }
 ```
 
 ### Graphs of variables by Plot:
 
-```{r, echo=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 select_plot(mve, "P13")
 select_plot(mve, "P14")
 select_plot(mve, "P15")
@@ -203,7 +208,9 @@ plot_variable <- function(data, measurement) {
     ggplot(., aes(x = TIMESTAMP, y = value, color = as.factor(depth))) +
     geom_point(size = 0.2, alpha = 0.5) +
     facet_wrap(~ plot) +
-    labs(title = paste(measurement))
+    labs(title = paste(measurement)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 }
 
 plot_variable_free_y <- function(data, measurement) {
@@ -212,22 +219,24 @@ plot_variable_free_y <- function(data, measurement) {
     ggplot(., aes(x = TIMESTAMP, y = value, color = as.factor(depth))) +
     geom_point(size = 0.2, alpha = 0.5) +
     facet_wrap(~ plot, scales = "free_y") +
-    labs(title = paste(measurement, "with free y-scale"))
+    labs(title = paste(measurement, "with free y-scale")) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 }
 ```
 
-```{r, echo=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 plot_variable(mve_long, "T")
 ```
 
 # VWC - all plots---
 
-```{r, echo=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 plot_variable(mve_long, "VWC")
 ```
 
 Graph with the y-scale free to vary for each plot:
 
-```{r, echo=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 plot_variable_free_y(mve_long, "VWC")
 ```
