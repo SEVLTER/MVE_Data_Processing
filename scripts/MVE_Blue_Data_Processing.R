@@ -41,7 +41,8 @@ mve_blue_old <- read_mve_in("MVE_Blue_pre_20221004_change/MVE_Blue.dat.backup") 
 
 # combine old and new data
 mve <- rbind(mve, mve_blue_old) %>% 
-  arrange(TIMESTAMP)
+  arrange(TIMESTAMP) %>% 
+  unique()
 
 
 # filter data to years of interest
@@ -49,7 +50,7 @@ mve_sub <- mve %>%
   filter(year(TIMESTAMP) >= filter_forward)
 
 
-glimpse(mve)
+glimpse(mve_sub)
 
 
 # load sensor label data -----------------------------------------------

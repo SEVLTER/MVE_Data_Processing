@@ -27,7 +27,8 @@ sub_file_name <- paste0("MVE_DesertGrassland_SoilMoistureTemperature_", filter_f
 # THIS NEEDS TO BE CHANGED FOR THE DIFFERENT SITES
 mve <- read_mve_in("MVE_Black.dat") %>% 
   select(-RECORD) %>% 
-  arrange(TIMESTAMP)
+  arrange(TIMESTAMP) %>% 
+  unique()
 
 
 
@@ -38,7 +39,7 @@ mve_sub <- mve %>%
   filter(year(TIMESTAMP) >= filter_forward)
 
 
-glimpse(mve)
+glimpse(mve_sub)
 
 
 # load sensor label data -----------------------------------------------

@@ -1,25 +1,37 @@
 ---
 title: "MVE Creosote QA/QC Report"
 author: "KM Hall"
-format: html
+format: 
+  html:
+    embed-resources: true
 editor: visual
 ---
-
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
 library(tidyverse)
 library(lubridate)
 library(kableExtra)
 
+source("../scripts/load_MVE_data_into_R.R")
+
+
 # Name of File to read in:
 file_name <- "MVE_Creosote_SoilMoistureTemperature_2023.csv"
 
-path_to_data_folder <- "~/Documents/SEV/Projects/MVE_Reporting/output/"
+path_to_long_data_folder <- "~/Documents/SEV/Projects/MVE_Reporting/output/"
 
-mve_long <- read_csv(paste0(path_to_data_folder, file_name))
-mve <- mve_long %>% 
-  select(TIMESTAMP, sensor_id, value) %>% 
-  pivot_wider(names_from = sensor_id, values_from = value)
+mve_long <- read_csv(paste0(path_to_long_data_folder, file_name)) %>% 
+  unique()
+
+
+mve_long_year <- min(year(mve_long$TIMESTAMP))
+
+
+mve <- read_mve_in_quarto("MVE_Creosote.dat") %>% 
+  select(-RECORD) %>% 
+  filter(year(TIMESTAMP) >= mve_long_year) %>% 
+  unique() %>% 
+  arrange(TIMESTAMP)
 ```
 
 Loaded file: `r file_name`.
@@ -28,7 +40,7 @@ Loaded file: `r file_name`.
 
 ## Number of records:
 
-Earliest and latest TIMESTAMP:  
+Earliest and latest TIMESTAMP:
 
 ```{r, echo=FALSE}
 mve %>% 
@@ -48,16 +60,91 @@ mve %>%
   ggtitle("Number of Daily Records")
 ```
 
+Number of daily records in the past 10 days:
+
 ```{r, echo=FALSE}
 num_daily_records <- mve %>% 
   mutate(Date = as_date(TIMESTAMP)) %>% 
   group_by(Date) %>% 
   summarize(Number_of_Records = n())
 
-num_daily_records %>% kbl() %>% kable_styling(full_width = FALSE)
+num_daily_records %>% 
+  filter(Date >= (today() - 10)) %>% 
+  kbl() %>% 
+  kable_styling(full_width = FALSE)
 ```
 
+------------------------------------------------------------------------
 
+## Data flags:
+
+```{r}
+# start date - two days prior to current date to allow time for wireless transmission
+# of the data
+summary_date <- today() - 2
+summary_date
+
+# 8 days prior to start date
+window_start_date <- today() - 9
+window_start_date
+
+# # 1 day prior to start date
+# window_end_date <- today() - 3
+# window_end_date
+
+
+
+
+
+# select data and calculate summaries for past 7 days
+mve_recent <- mve %>% 
+  filter(TIMESTAMP >= window_start_date & TIMESTAMP < summary_date)
+
+mve_weekly_summary <- mve_recent %>% 
+  pivot_longer(-TIMESTAMP, names_to = "variable") %>% 
+  select(-TIMESTAMP) %>% 
+  group_by(variable) %>% 
+  summarize(min_value = min(value, na.rm = TRUE),
+          max_value = max(value, na.rm = TRUE),
+          mean_value = mean(value, na.rm = TRUE),
+          sd_value = sd(value, na.rm = TRUE),
+          n_rec_total = n())
+
+mve_daily_summary <- mve %>% 
+  mutate(date = as.Date(TIMESTAMP)) %>% 
+  filter(date == summary_date) %>% 
+  pivot_longer(-c(TIMESTAMP, date), names_to = "variable") %>% 
+  select(-TIMESTAMP) %>% 
+  group_by(variable) %>% 
+  summarize(current_mean_value = mean(value),
+            n_rec_current = n()) %>% 
+  left_join(mve_weekly_summary) %>% 
+  mutate(lt_min_flag = current_mean_value < min_value,
+         gt_max_flag = current_mean_value > max_value,
+         lt_2sd_flag  = current_mean_value < (mean_value - (2 * sd_value)),
+         gt_2sd_flag  = current_mean_value > (mean_value + (2* sd_value)),
+         n_rec_current_low_flag = n_rec_current < (48 * 0.8),
+         n_rec_total_low_flag = n_rec_total < (7 * 48 * 0.8))
+
+
+
+mve_daily_problems <- mve_daily_summary %>% 
+  filter(lt_min_flag == TRUE | gt_max_flag == TRUE | lt_2sd_flag == TRUE |
+           gt_2sd_flag == TRUE | n_rec_current_low_flag == TRUE | 
+           n_rec_total_low_flag == TRUE)
+
+
+```
+
+The day being evaluated is `r summary_date` and the dates used to calculate the summaries are from `r window_start_date` and `r (summary_date - 1)`.
+
+### Records with at least one flag setting as TRUE:
+
+```{r}
+mve_daily_problems %>% 
+  kbl() %>% 
+  kable_styling(full_width = FALSE)
+```
 
 ------------------------------------------------------------------------
 
@@ -81,8 +168,8 @@ select_plot <- function(data, plot) {
 ### Graphs of variables by Plot:
 
 ```{r, echo=FALSE}
-select_plot(mve, "P1")
-select_plot(mve, "P2")
+select_plot(mve, "P1_")
+select_plot(mve, "P2_")
 select_plot(mve, "P3")
 select_plot(mve, "P4")
 select_plot(mve, "P6")
@@ -129,8 +216,6 @@ plot_variable(mve_long, "T")
 ```
 
 # VWC - all plots---
-
-
 
 ```{r, echo=FALSE}
 plot_variable(mve_long, "VWC")
