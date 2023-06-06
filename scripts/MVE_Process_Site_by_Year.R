@@ -115,7 +115,7 @@ process_mve <- function(site, year_to_process) {
   write_csv(mve_sub_long, paste0(folder_out, sub_file_name))
   
     
-    
+  return(paste("Data processing complete"))
   
   # return(names(mve_sub))
   
@@ -127,4 +127,5 @@ process_mve <- function(site, year_to_process) {
 process_mve(site = myargs[1], year = myargs[2])
 
 
-
+# TODO:
+# - incorporate creosote, jsav, pj - look at how sensor_id is constructed
