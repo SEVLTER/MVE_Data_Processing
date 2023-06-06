@@ -63,46 +63,22 @@ sensor_labels <- read_csv("raw_data/MVE_PlainsGrassland_5TM_Sensor_Labels.csv") 
 
 # create a long version of the data -------------------------------------
 
-mve_long <- mve %>% 
-  pivot_longer(-TIMESTAMP, names_to = "sensor_id")
-
-mve_sub_long <- mve_sub %>% 
-  pivot_longer(-TIMESTAMP, names_to = "sensor_id")
-
 
 # separate sensor column on _ to get various pieces of information contained in the variable into their own variables and
 # adding date component variables
 # TODO: THIS MAY NEED TO BE DIFFERENT FOR THE DIFFERENT SITES, depending on how many pieces the 
-#   sensore variable has. 4 pieces for MVE Blue.
-mve_long <- mve_long %>% 
-  separate(sensor_id, into = c("sensor", "plot", "depth", "new"), sep = "_", remove = FALSE) %>% 
-  mutate(sensor = as.factor(sensor),
-         plot = as.factor(plot),
-         depth_f = as.factor(depth),
-         depth = as.numeric(depth),
-         year = year(TIMESTAMP),
-         month = month(TIMESTAMP),
-         day = day(TIMESTAMP),
-         hour = hour(TIMESTAMP),
-         minute = minute(TIMESTAMP),
-         year_f = as.factor(year),
-         month_f = as.factor(month),
-         day_f = as.factor(day))
+#   sensor variable has. 4 pieces for MVE Blue.
 
-mve_sub_long <- mve_sub_long %>% 
-  separate(sensor_id, into = c("sensor", "plot", "depth", "new"), sep = "_", remove = FALSE) %>% 
-  mutate(sensor = as.factor(sensor),
-         plot = as.factor(plot),
-         depth_f = as.factor(depth),
-         depth = as.numeric(depth),
-         year = year(TIMESTAMP),
-         month = month(TIMESTAMP),
-         day = day(TIMESTAMP),
-         hour = hour(TIMESTAMP),
-         minute = minute(TIMESTAMP),
-         year_f = as.factor(year),
-         month_f = as.factor(month),
-         day_f = as.factor(day))
+
+mve_long <- mve %>% 
+  pivot_longer(-TIMESTAMP, names_to = "sensor_id") %>% 
+  separate(sensor_id, into = c("sensor", "plot", "depth", "new"), sep = "_", remove = FALSE) 
+
+
+mve_sub_long <- mve_sub %>% 
+  pivot_longer(-TIMESTAMP, names_to = "sensor_id") %>% 
+  separate(sensor_id, into = c("sensor", "plot", "depth", "new"), sep = "_", remove = FALSE) 
+
 
 glimpse(mve_long)
 
@@ -115,14 +91,10 @@ table(mve_long$new)
 # Merge sensor data with sensor labels -------------------------------------
 
 mve_long <- mve_long %>% 
-  left_join(sensor_labels) %>% 
-  mutate(mean_f = as.factor(mean_trt),
-         var_f  = as.factor(var_trt))
+  left_join(sensor_labels) 
 
 mve_sub_long <- mve_sub_long %>% 
-  left_join(sensor_labels) %>% 
-  mutate(mean_f = as.factor(mean_trt),
-         var_f  = as.factor(var_trt))
+  left_join(sensor_labels)
 
 
 
@@ -149,10 +121,12 @@ missing_data_sub <- mve_sub_long %>%
 
 # percent by year and sensor
 missing_data_all_annual <- mve_long %>% 
+  mutate(year = year(TIMESTAMP)) %>% 
   group_by(year, sensor_id) %>% 
   summarize(percent_missing = sum(is.na(value)) / n() * 100)
 
 missing_data_sub_annual <- mve_sub_long %>% 
+  mutate(year = year(TIMESTAMP)) %>% 
   group_by(year, sensor_id) %>% 
   summarize(percent_missing = sum(is.na(value)) / n() * 100)
 
