@@ -4,7 +4,8 @@
 # Function that is used to import MVE data into R. This file will be sources by the
 # scripts that process MVE Blue, Black, and Creosote.
 
-path_to_data_folder <- "raw_data/"
+# path_to_data_folder <- "raw_data/"
+path_to_data_folder <- "../raw_data/"
 
 
 # function to read .dat files into R after downloading from GDrive
