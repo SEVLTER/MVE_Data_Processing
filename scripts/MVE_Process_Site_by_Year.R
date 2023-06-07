@@ -28,6 +28,21 @@ myargs
 
 
 process_mve <- function(site, year_to_process) {
+  # process_mve function:
+  # 
+  # Takes raw .dat MVE files as input and produces a long version of the data the data
+  # as output.
+  #
+  # Function arguments: 
+  # site: "blue", "black", "creosote", "pj", "jsav" are the choices for site, entered into
+  #        the function with quotes
+  # year: 4-digit year (YYYY) entered into the function without quotes
+  #
+  # 
+  # Intended to be run at the command line from within the scripts folder for the project, for example:
+  # Rscript MVE_Process_Site_by_Year.R "creosote" 2023
+  
+  
   library(tidyverse)
   library(lubridate)
   
