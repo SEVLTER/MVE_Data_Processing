@@ -65,11 +65,13 @@ process_mve <- function(site, year_to_process) {
     paste0("MVE_PlainsGrassland_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
   } else if (site == "black") {
     paste0("MVE_DesertGrassland_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
-  } else if(site == "creosote") {
+  } else if (site == "creosote") {
     paste0("MVE_Creosote_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
-  } else {
-    paste0("File not found")
-    }
+  } else if (site == "pj") {
+    paste0("MVE_PJ_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
+  } else if (site == "jsav") {
+    paste0("MVE_JSav_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
+  } 
   
   # load MVE data ------------------------------------------------------------
   
@@ -80,6 +82,10 @@ process_mve <- function(site, year_to_process) {
     "MVE_Black.dat"
   } else if (site == "creosote") {
     "MVE_Creosote.dat"
+  } else if (site == "pj") {
+    "MVE_PJ_Table1_52423_MVC_2023_05_24_10_49_50.dat"
+  } else if (site == "jsav") {
+    "MVE_JSAV_Table1_52423_MVC_2023_05_24_12_46_59.dat"
   } else {
     NULL
   }
@@ -137,28 +143,41 @@ process_mve <- function(site, year_to_process) {
              depth2split = ifelse(piece3 %in% c(12, 22, 37), piece3, NA),
              plot_extra = ifelse(piece1 %in% c(2, 3), piece1, NA),
              plot = ifelse((!is.na(plot1split) & is.na(plot2split)), plot1split, plot2split),
-             depth = ifelse((!is.na(depth1split) & is.na(depth2split)), depth1split, depth2split),
-             plot_extra = ifelse(piece1 %in% c(2, 3), piece1, NA)) |> 
+             depth = ifelse((!is.na(depth1split) & is.na(depth2split)), depth1split, depth2split)) |> 
       select(-c(avg, piece1, piece2, piece3, plot1split, plot2split, depth1split, depth2split))
+  } else if (site == "pj") {
+    mve_sub |> 
+      pivot_longer(-TIMESTAMP, names_to = "sensor_id") |> 
+      separate(sensor_id, into = c("sensor", "piece1", "piece2", "piece3", "piece4"), sep = "_", remove = FALSE) |> 
+      mutate(plot1split = ifelse(piece1 %in% c(2, 3), NA, piece1),
+             plot2split = ifelse(piece2 %in% c(12, 22, 37), NA, piece2),
+             depth1split = ifelse(piece2 %in% c(12, 22, 37), piece2, NA),
+             depth2split = ifelse(piece3 %in% c(12, 22, 37), piece3, NA),
+             plot_extra = ifelse(piece1 %in% c(2, 3), piece1, NA),
+             plot = ifelse((!is.na(plot1split) & is.na(plot2split)), plot1split, plot2split),
+             depth = ifelse((!is.na(depth1split) & is.na(depth2split)), depth1split, depth2split)) |> 
+      select(-c(piece1, piece2, piece3, piece4, plot1split, plot2split, depth1split, depth2split))
+  } else if (site == "jsav") {
+    mve_sub |> 
+      pivot_longer(-TIMESTAMP, names_to = "sensor_id") |> 
+      separate(sensor_id, into = c("sensor", "piece1", "piece2", "piece3", "piece4"), sep = "_", remove = FALSE) |> 
+      mutate(plot1split = ifelse(piece1 %in% c(2, 3), NA, piece1),
+             plot2split = ifelse(piece2 %in% c(12, 22, 37), NA, piece2),
+             depth1split = ifelse(piece2 %in% c(12, 22, 37), piece2, NA),
+             depth2split = ifelse(piece3 %in% c(12, 22, 37), piece3, NA),
+             plot_extra = ifelse(piece1 %in% c(2, 3), piece1, NA),
+             plot = ifelse((!is.na(plot1split) & is.na(plot2split)), plot1split, plot2split),
+             depth = ifelse((!is.na(depth1split) & is.na(depth2split)), depth1split, depth2split)) |> 
+      select(-c(piece1, piece2, piece3, piece4, plot1split, plot2split, depth1split, depth2split))
   } else {
     NULL
   }
     
   write_csv(mve_sub_long, paste0(folder_out, sub_file_name))
   
-    
   return(paste("Data processing complete"))
-  
-  # return(names(mve_sub))
-  
-  
-  
 }
 
 
 process_mve(site = myargs[1], year = myargs[2])
 
-
-# TODO:
-# - incorporate jsav, pj - look at how sensor_id is constructed
-# - double check the plot_extra variable in creosote
