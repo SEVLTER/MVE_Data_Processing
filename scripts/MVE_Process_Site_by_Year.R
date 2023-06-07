@@ -62,15 +62,15 @@ process_mve <- function(site, year_to_process) {
   
   # name of final output file for year of data being processed
   sub_file_name <- if (site == 'blue') {
-    paste0("MVE_PlainsGrassland_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
+    paste0("MVE_PlainsGrassland_SoilMoistureTemperature_", filter_to_year, ".csv")
   } else if (site == "black") {
-    paste0("MVE_DesertGrassland_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
+    paste0("MVE_DesertGrassland_SoilMoistureTemperature_", filter_to_year, ".csv")
   } else if (site == "creosote") {
-    paste0("MVE_Creosote_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
+    paste0("MVE_Creosote_SoilMoistureTemperature_", filter_to_year, ".csv")
   } else if (site == "pj") {
-    paste0("MVE_PJ_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
+    paste0("MVE_PJ_SoilMoistureTemperature_", filter_to_year, ".csv")
   } else if (site == "jsav") {
-    paste0("MVE_JSav_SoilMoistureTemperature_TEST", filter_to_year, ".csv")
+    paste0("MVE_JSav_SoilMoistureTemperature_", filter_to_year, ".csv")
   } 
   
   # load MVE data ------------------------------------------------------------
