@@ -1,0 +1,239 @@
+---
+title: "MVE PJ QA/QC Report"
+author: "KM Hall"
+format: 
+  html: 
+    embed-resources: true
+editor: visual
+---
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)
+library(lubridate)
+library(kableExtra)
+
+source("../scripts/load_MVE_data_into_R.R")
+
+
+# Name of File to read in:
+file_name <- "MVE_PJ_SoilMoistureTemperature_2023.csv"
+
+path_to_long_data_folder <- "~/Documents/SEV/Projects/MVE_Reporting/output/"
+
+mve_long <- read_csv(paste0(path_to_long_data_folder, file_name)) %>% 
+  unique()
+
+# filter outlier values
+# mve_long <- mve_long %>% mutate(value = ifelse(value > 200, NA, value))
+
+mve_long_year <- min(year(mve_long$TIMESTAMP))
+
+mve <- read_mve_in_quarto("MVE_PJ_Table1_52423_MVC_2023_05_24_10_49_50.dat") %>% 
+  select(-RECORD) %>% 
+  filter(year(TIMESTAMP) >= mve_long_year) %>% 
+  unique() %>% 
+  arrange(TIMESTAMP)
+```
+
+Loaded file: `r file_name`.
+
+------------------------------------------------------------------------
+
+## Number of records:
+
+Earliest and latest TIMESTAMP:
+
+```{r, echo=FALSE}
+mve %>% 
+  summarize(minimum_TIMESTAMP = min(TIMESTAMP),
+            maximum_TIMESTAMP = max(TIMESTAMP))
+```
+
+Number of daily records:
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+mve %>% 
+  mutate(Date = as_date(TIMESTAMP)) %>% 
+  group_by(Date) %>% 
+  summarize(Number_of_Records = n()) %>%
+  ggplot(., aes(x = Date, y = Number_of_Records)) +
+  geom_line(linewidth = 0.5) +
+  ggtitle("Number of Daily Records") +
+  theme_minimal() +
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+Number of daily records in the past 10 days:
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+num_daily_records <- mve %>% 
+  mutate(Date = as_date(TIMESTAMP)) %>% 
+  group_by(Date) %>% 
+  summarize(Number_of_Records = n())
+
+num_daily_records %>% 
+  filter(Date >= (today() - 10)) %>% 
+  kbl() %>% 
+  kable_styling(full_width = FALSE)
+```
+
+------------------------------------------------------------------------
+
+## Data flags:
+
+```{r}
+# start date - two days prior to current date to allow time for wireless transmission
+# of the data
+summary_date <- today() - 2
+summary_date
+
+# 8 days prior to start date
+window_start_date <- today() - 9
+window_start_date
+
+# # 1 day prior to start date
+# window_end_date <- today() - 3
+# window_end_date
+
+
+
+
+
+# select data and calculate summaries for past 7 days
+mve_recent <- mve %>% 
+  filter(TIMESTAMP >= window_start_date & TIMESTAMP < summary_date)
+
+mve_weekly_summary <- mve_recent %>% 
+  pivot_longer(-TIMESTAMP, names_to = "variable") %>% 
+  select(-TIMESTAMP) %>% 
+  group_by(variable) %>% 
+  summarize(min_value = min(value, na.rm = TRUE),
+          max_value = max(value, na.rm = TRUE),
+          mean_value = mean(value, na.rm = TRUE),
+          sd_value = sd(value, na.rm = TRUE),
+          n_rec_total = n())
+
+mve_daily_summary <- mve %>% 
+  mutate(date = as.Date(TIMESTAMP)) %>% 
+  filter(date == summary_date) %>% 
+  pivot_longer(-c(TIMESTAMP, date), names_to = "variable") %>% 
+  select(-TIMESTAMP) %>% 
+  group_by(variable) %>% 
+  summarize(current_mean_value = mean(value),
+            n_rec_current = n()) %>% 
+  left_join(mve_weekly_summary) %>% 
+  mutate(lt_min_flag = current_mean_value < min_value,
+         gt_max_flag = current_mean_value > max_value,
+         lt_2sd_flag  = current_mean_value < (mean_value - (2 * sd_value)),
+         gt_2sd_flag  = current_mean_value > (mean_value + (2* sd_value)),
+         n_rec_current_low_flag = n_rec_current < (48 * 0.8),
+         n_rec_total_low_flag = n_rec_total < (7 * 48 * 0.8))
+
+
+
+mve_daily_problems <- mve_daily_summary %>% 
+  filter(lt_min_flag == TRUE | gt_max_flag == TRUE | lt_2sd_flag == TRUE |
+           gt_2sd_flag == TRUE | n_rec_current_low_flag == TRUE | 
+           n_rec_total_low_flag == TRUE)
+
+
+```
+
+The day being evaluated is `r summary_date` and the dates used to calculate the summaries are from `r window_start_date` and `r (summary_date - 1)`.
+
+### Records with at least one flag setting as TRUE:
+
+```{r}
+mve_daily_problems %>% 
+  kbl() %>% 
+  kable_styling(full_width = FALSE)
+```
+
+------------------------------------------------------------------------
+
+## Data check:
+
+Graphs of all variables for each plot for MVE blue.
+
+```{r, echo=FALSE}
+# Function to select experimental plot and graph all variables for the given plot
+select_plot <- function(data, plot) {
+  data %>% 
+    select(TIMESTAMP, contains(plot)) %>% 
+    pivot_longer(contains(plot)) %>% 
+    ggplot(., aes(x = TIMESTAMP, y = value, color = name)) +
+    geom_point(size=0.2) +
+    facet_wrap(~name, scales="free_y") +
+    theme_minimal() +
+    theme(legend.position="none") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+}
+```
+
+### Graphs of variables by Plot:
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+select_plot(mve, "P1_")
+select_plot(mve, "P2")
+select_plot(mve, "P3")
+select_plot(mve, "P4")
+select_plot(mve, "P5")
+select_plot(mve, "P6")
+select_plot(mve, "P7")
+select_plot(mve, "P8")
+select_plot(mve, "P9")
+select_plot(mve, "P10")
+select_plot(mve, "P11")
+select_plot(mve, "P12")
+select_plot(mve, "P13")
+select_plot(mve, "P14")
+select_plot(mve, "P15")
+select_plot(mve, "P16")
+select_plot(mve, "P17")
+select_plot(mve, "P18")
+
+```
+
+# Temperature - all plots---
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+plot_variable <- function(data, measurement) {
+  data %>% 
+    filter(sensor == measurement) %>% 
+    ggplot(., aes(x = TIMESTAMP, y = value, color = as.factor(depth))) +
+    geom_point(size = 0.2, alpha = 0.5) +
+    facet_wrap(~ plot) +
+    labs(title = paste(measurement)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+}
+
+plot_variable_free_y <- function(data, measurement) {
+  data %>% 
+    filter(sensor == measurement) %>% 
+    ggplot(., aes(x = TIMESTAMP, y = value, color = as.factor(depth))) +
+    geom_point(size = 0.2, alpha = 0.5) +
+    facet_wrap(~ plot, scales = "free_y") +
+    labs(title = paste(measurement, "with free y-scale")) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+}
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+plot_variable(mve_long, "T")
+```
+
+# VWC - all plots---
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+plot_variable(mve_long, "VWC")
+```
+
+Graph with the y-scale free to vary for each plot:
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+plot_variable_free_y(mve_long, "VWC")
+```
