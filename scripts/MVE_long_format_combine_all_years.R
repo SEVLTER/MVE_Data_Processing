@@ -33,3 +33,14 @@ black <- rbind(black2019, black2020, black2021, black2022, black2023) |>
 
 write_csv(black, "output/MVE_DesertGrassland_SoilMoistureTemperature_2019_to_2023.csv")
 
+
+# creosote -----  
+creosote2022 <- read_csv("output/MVE_Creosote_SoilMoistureTemperature_2022.csv")
+creosote2023 <- read_csv("output/MVE_Creosote_SoilMoistureTemperature_2023.csv")
+
+creosote <- rbind(creosote2022, creosote2023)
+
+write_csv(creosote, "output/MVE_Creosote_SoilMoistureTemperature_2022_to_2023.csv")
+
+
+
