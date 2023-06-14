@@ -49,4 +49,14 @@ pj2023 <- read_csv("output/MVE_PJ_SoilMoistureTemperature_2023.csv")
 
 pj <- rbind(pj2022, pj2023)
 
-write_csv(pj, "ouput/MVE_PJ_SoilMoistureTemperature_2022_to_2023.csv")
+write_csv(pj, "output/MVE_PJ_SoilMoistureTemperature_2022_to_2023.csv")
+
+
+# jsav -----
+jsav2022 <- read_csv("output/MVE_JSav_SoilMoistureTemperature_2022.csv")
+jsav2023 <- read_csv("output/MVE_JSav_SoilMoistureTemperature_2023.csv")
+
+jsav <- rbind(jsav2022, jsav2023)
+
+write_csv(jsav, "output/MVE_JSav_SoilMoistureTemperature_2022_to_2023.csv")
+
