@@ -43,4 +43,10 @@ creosote <- rbind(creosote2022, creosote2023)
 write_csv(creosote, "output/MVE_Creosote_SoilMoistureTemperature_2022_to_2023.csv")
 
 
+# pj -----
+pj2022 <- read_csv("output/MVE_PJ_SoilMoistureTemperature_2022.csv")
+pj2023 <- read_csv("output/MVE_PJ_SoilMoistureTemperature_2023.csv")
 
+pj <- rbind(pj2022, pj2023)
+
+write_csv(pj, "ouput/MVE_PJ_SoilMoistureTemperature_2022_to_2023.csv")
