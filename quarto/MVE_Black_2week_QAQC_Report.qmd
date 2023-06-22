@@ -172,7 +172,7 @@ select_plot <- function(data, plot) {
     select(TIMESTAMP, contains(plot)) %>% 
     pivot_longer(contains(plot)) %>% 
     ggplot(., aes(x = TIMESTAMP, y = value, color = name)) +
-    geom_point(size=0.2) +
+    geom_line(linewidth=0.5) +
     facet_wrap(~name, scales="free_y") +
     theme_minimal() +
     theme(legend.position="none") +
