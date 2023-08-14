@@ -127,7 +127,7 @@ mve_daily_summary <- mve %>%
   filter(date == summary_date) %>% 
   pivot_longer(-c(TIMESTAMP, date), names_to = "variable") %>% 
   select(-TIMESTAMP) %>% 
-  group_by(variable) %>% 
+  group_by(variable, date) %>% 
   summarize(current_mean_value = mean(value),
             n_rec_current = n()) %>% 
   left_join(mve_weekly_summary) %>% 
@@ -135,15 +135,13 @@ mve_daily_summary <- mve %>%
          gt_max_flag = current_mean_value > max_value,
          lt_2sd_flag  = current_mean_value < (mean_value - (2 * sd_value)),
          gt_2sd_flag  = current_mean_value > (mean_value + (2* sd_value)),
-         n_rec_current_low_flag = n_rec_current < (48 * 0.8),
-         n_rec_total_low_flag = n_rec_total < (7 * 48 * 0.8))
+         n_rec_current_low_flag = n_rec_current < (48 * 0.8))
 
 
 
 mve_daily_problems <- mve_daily_summary %>% 
   filter(lt_min_flag == TRUE | gt_max_flag == TRUE | lt_2sd_flag == TRUE |
-           gt_2sd_flag == TRUE | n_rec_current_low_flag == TRUE | 
-           n_rec_total_low_flag == TRUE)
+           gt_2sd_flag == TRUE | n_rec_current_low_flag == TRUE)
 
 
 ```
